@@ -1,48 +1,67 @@
-create table test. products (
- id serial primary key,
-    name varchar (255),
-    price decimal (10,2),
-    category varchar( 50),
-    stock int
+create table test.student (
+    id serial primary key ,
+    full_name varchar(50) ,
+    gender  text ,
+    birth_year date ,
+    major varchar(50),
+    gpa float
+
+
 );
-insert into test.products (name, price, category, stock) values ('Product 1', 19.99, 'Electronics', 100);
-insert into test.products (name, price, category, stock) values ('Product 2', 29.99, 'Clothing', 50);
-insert into test.products (name, price, category, stock) values ('Product 3', 49.99, 'Books', 200);
 
--- cap nhatja them tble product thanhf7
 
-update test.products p
-set stock = 7
-where name = 'Laptop DELl';
+insert into test.student (full_name, gender, birth_year, major, gpa)
+values
+    ('John Doe', 'Male', '1990-01-01', 'Computer Engineering', 3.8),
+    ('Jane Smith', 'Female', '1992-05-15', 'Business Management', 3.5),
+    ('Alice Lee', 'Female', '1991-08-20', 'Art History', 3.9),
+    ('Bob Green', 'Male', '1993-12-10', 'Physics', 3.7),
+    ('Eva White', 'Female', '1994-03-25', 'Math', 4.0);
 
--- xoa san phan co stock = 0
- delete from test.products p
- where stock = 0 ;
+-- Cập nhật GPA cho “Lê Quốc Cường”
 
--- liet ke cac san phan theo gia tang dan
-select p.id, p.name,p.category,p.stock,p.price
-from test.products p
-order by stock = 0 ;
+update test.student s
+set gpa = 3.4
+where id = 3 ;
 
--- leit ke theo danh muc
-select distinct category
-from test.products p
-order by p.category
--- liet ke esan phan cos gia tu 100 den 1000
-select name
-from test.products p
-where price between 100 and  1000
-order by price desc ;
+-- xoa du lieu co gpa is null
 
---  Liệt kê sản phẩm có tên chứa 'LG' hoặc 'Samsung' (không phân biệt hoa thường)
+delete
+from test.student s
+where gpa is null
 
-select name
-from test.products p
-where name ilike '%LG%' or name '%samsum%';
+-- hien thi sin vien nganh cntt cos gpa >= 3.0 , chi lay 3 ket qua dau tien
 
--- Lấy sản phẩm thứ 2 đến thứ 3 theo giá giảm dần (tức là bỏ qua sp đắt nhất)
+select id, full_name
+from test.student s
+where major ='Math' and gpa >= 3.0
+order by id
+limit 3
 
-select  id, name
-from test.products p
-order by p.price desc
-limit 2 offset 1 ;
+-- liet ke danh dach snganh hocj di nhat
+
+select distinct major
+from test.student s
+where major is null
+order by major
+
+-- Hiển thị sinh viên ngành CNTT, sắp xếp giảm dần theo GPA, sau đó tăng dần theo tên
+
+select id, full_name
+from test.student s
+where major = 'Math'
+order by gpa desc ,
+         full_name asc ;
+
+
+--  Tìm sinh viên có tên bắt đầu bằng “Nguyễn”
+
+select id, full_name
+from test.student s
+where full_name ilike 'John%'
+
+-- hien thi sian ven ci namw sinh tu 2001 den 2004
+select id , full_name 
+from test.student s
+where birth_year between 2001 and 2003
+order by birth_year , full_name
