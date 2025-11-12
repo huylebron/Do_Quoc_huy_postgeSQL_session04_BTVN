@@ -1,0 +1,52 @@
+create table test.product (
+    id serial primary key ,
+    name varchar(100) ,
+    category varchar(50),
+    price float,
+    stock int,
+    manufacturer varchar(50)
+
+
+
+)
+
+-- 2) Tăng giá tất cả sản phẩm của Apple thêm 10%
+UPDATE test.products
+SET price = price * 1.10
+WHERE manufacturer = 'Apple';
+
+-- 3) Xóa sản phẩm có stock = 0
+DELETE FROM test.products
+WHERE stock = 0;
+
+-- 4) Lọc theo điều kiện: price BETWEEN 1,000,000 AND 30,000,000 (bao gồm 2 đầu)
+SELECT id, name, category, price, stock, manufacturer
+FROM test.products
+WHERE price BETWEEN 1000000 AND 30000000;
+
+-- 5) Lọc giá trị NULL: stock IS NULL
+SELECT id, name, category, price, stock, manufacturer
+FROM test.products
+WHERE stock IS NULL;
+
+-- 6) Loại bỏ trùng (liệt kê hãng sản xuất duy nhất)
+SELECT DISTINCT manufacturer
+FROM test.products
+WHERE manufacturer IS NOT NULL
+ORDER BY manufacturer;
+
+-- 7) Sắp xếp dữ liệu: giảm dần theo giá, sau đó tăng dần theo tên
+SELECT id, name, category, price, stock, manufacturer
+FROM test.products
+ORDER BY price DESC, name ASC;
+
+-- 8) Tìm kiếm: tên chứa “laptop” (không phân biệt hoa/thường)
+SELECT id, name, category, price, stock, manufacturer
+FROM test.products
+WHERE name ILIKE '%laptop%';
+
+-- 9) Giới hạn kết quả: chỉ 2 sản phẩm đầu tiên sau khi sắp xếp như (7)
+SELECT id, name, category, price, stock, manufacturer
+FROM test.products
+ORDER BY price DESC, name ASC
+LIMIT 2;
