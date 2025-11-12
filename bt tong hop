@@ -1,0 +1,106 @@
+CREATE TABLE customers (
+  customer_id   INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  full_name     VARCHAR(120) NOT NULL,
+  email         VARCHAR(150) NOT NULL UNIQUE,
+  phone         VARCHAR(30),
+  city          VARCHAR(80),
+  join_date     DATE NOT NULL DEFAULT CURRENT_DATE,
+  CHECK (email ~* '^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$')
+);
+
+CREATE TABLE products (
+  product_id     INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  product_name   VARCHAR(150) NOT NULL,
+  category       VARCHAR(80)  NOT NULL,
+  price          NUMERIC(12,2) NOT NULL CHECK (price >= 0),
+  stock_quantity INTEGER NOT NULL CHECK (stock_quantity >= 0)
+);
+
+CREATE TABLE orders (
+  order_id     INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  customer_id  INTEGER NOT NULL REFERENCES customers(customer_id),
+  order_date   DATE NOT NULL DEFAULT CURRENT_DATE,
+  total_amount NUMERIC(14,2) NOT NULL CHECK (total_amount >= 0),
+  status       VARCHAR(20) NOT NULL,
+  CHECK (status IN ('PENDING','CONFIRMED','SHIPPED','DELIVERED','CANCELLED','RETURNED'))
+);
+
+-- ===========================================================
+-- PHẦN 1: INSERT DỮ LIỆU
+-- ===========================================================
+
+-- 1) Thêm 10 khách hàng
+INSERT INTO customers (full_name, email, phone, city, join_date) VALUES
+('Nguyễn Minh Quân',     'quan.nguyen@example.com',   '0901000001', 'Hà Nội',     '2024-01-15'),
+('Trần Thị Hồng',        'hong.tran@example.com',     '0901000002', 'TP.HCM',     '2024-03-20'),
+('Lê Quốc Bảo',          'bao.le@example.com',        '0901000003', 'Đà Nẵng',    '2023-11-02'),
+('Phạm Ngọc Linh',       'linh.pham@example.com',     '0901000004', 'Hải Phòng',  '2025-02-10'),
+('Võ Đức Thịnh',         'thinh.vo@example.com',      '0901000005', 'Cần Thơ',    '2024-09-05'),
+('Bùi Thị An',           'an.bui@example.com',        '0901000006', 'Nha Trang',  '2023-07-12'),
+('Đinh Văn Tài',         'tai.dinh@example.com',      '0901000007', 'Huế',        '2024-12-01'),
+('Hoàng Thị Mai',        'mai.hoang@example.com',     '0901000008', 'Hà Nội',     '2025-04-08'),
+('Ngô Thanh Sơn',        'son.ngo@example.com',       '0901000009', 'Biên Hòa',   '2024-05-30'),
+('Trịnh Thu Hà',         'ha.trinh@example.com',      '0901000010', 'TP.HCM',     '2023-09-18');
+
+-- 2) Thêm 15 sản phẩm (>= 3 danh mục)
+INSERT INTO products (product_name, category, price, stock_quantity) VALUES
+('Laptop Dell Inspiron 14',   'Electronics',   18500000, 10),
+('iPhone 14',                 'Electronics',   21000000, 15),
+('Samsung Galaxy A55',        'Electronics',   9000000,  20),
+('Tai nghe Sony WH-CH520',    'Accessories',   1500000,  25),
+('Chuột Logitech M331',       'Accessories',   390000,   40),
+('Bàn phím cơ Razer',         'Accessories',   2200000,  12),
+('TV LG 55 inch 4K',          'Electronics',   12500000, 5),
+('Loa Bluetooth JBL Go 3',    'Accessories',   890000,   30),
+('Máy lọc không khí Sharp',   'Home',          3200000,  8),
+('Nồi chiên không dầu Philips','Home',         2600000,  14),
+('Máy hút bụi Xiaomi',        'Home',          2100000,  0),   -- sẽ bị xóa ở bước DELETE
+('MacBook Air M2',            'Electronics',   29000000, 6),
+('Pin sạc dự phòng Anker',    'Accessories',   650000,   50),
+('Router WiFi TP-Link AX55',  'Electronics',   1900000,  22),
+('Máy in Canon LBP 6030',     'Electronics',   1900000,  9);
+
+-- 3) Thêm 8 đơn hàng (trạng thái khác nhau)
+-- (Chỉ dùng customer_id 1..10 đã tạo ở trên)
+INSERT INTO orders (customer_id, order_date, total_amount, status) VALUES
+(1, '2025-10-01',  9200000,  'PENDING'),
+(2, '2025-10-03', 18500000,  'CONFIRMED'),
+(3, '2025-10-05',  890000,   'DELIVERED'),
+(4, '2025-10-06', 21000000,  'SHIPPED'),
+(5, '2025-10-08', 3200000,   'CANCELLED'),
+(6, '2025-10-10',  390000,   'DELIVERED'),
+(7, '2025-10-12', 12500000,  'RETURNED'),
+(8, '2025-10-15', 29000000,  'PENDING');
+
+-- ===========================================================
+-- PHẦN 2: UPDATE DỮ LIỆU
+-- ===========================================================
+
+-- a) Tăng 10% giá sản phẩm thuộc category 'Electronics'
+UPDATE products
+SET price = ROUND(price * 1.10, 2)
+WHERE category = 'Electronics';
+
+-- b) Cập nhật số điện thoại cho khách hàng theo email cụ thể (ví dụ)
+UPDATE customers
+SET phone = '0988777666'
+WHERE email = 'hong.tran@example.com';
+
+-- c) Cập nhật trạng thái đơn hàng từ 'PENDING' -> 'CONFIRMED'
+UPDATE orders
+SET status = 'CONFIRMED'
+WHERE status = 'PENDING';
+
+-- ===========================================================
+-- PHẦN 3: DELETE DỮ LIỆU
+-- ===========================================================
+
+-- a) Xóa các sản phẩm có số lượng tồn kho = 0
+DELETE FROM products
+WHERE stock_quantity = 0;
+
+-- b) Xóa khách hàng không có đơn hàng nào
+DELETE FROM customers c
+WHERE NOT EXISTS (
+  SELECT 1 FROM orders o WHERE o.customer_id = c.customer_id
+);
