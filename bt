@@ -1,0 +1,48 @@
+create table test. products (
+ id serial primary key,
+    name varchar (255),
+    price decimal (10,2),
+    category varchar( 50),
+    stock int
+);
+insert into test.products (name, price, category, stock) values ('Product 1', 19.99, 'Electronics', 100);
+insert into test.products (name, price, category, stock) values ('Product 2', 29.99, 'Clothing', 50);
+insert into test.products (name, price, category, stock) values ('Product 3', 49.99, 'Books', 200);
+
+-- cap nhatja them tble product thanhf7
+
+update test.products p
+set stock = 7
+where name = 'Laptop DELl';
+
+-- xoa san phan co stock = 0
+ delete from test.products p
+ where stock = 0 ;
+
+-- liet ke cac san phan theo gia tang dan
+select p.id, p.name,p.category,p.stock,p.price
+from test.products p
+order by stock = 0 ;
+
+-- leit ke theo danh muc
+select distinct category
+from test.products p
+order by p.category
+-- liet ke esan phan cos gia tu 100 den 1000
+select name
+from test.products p
+where price between 100 and  1000
+order by price desc ;
+
+--  Liệt kê sản phẩm có tên chứa 'LG' hoặc 'Samsung' (không phân biệt hoa thường)
+
+select name
+from test.products p
+where name ilike '%LG%' or name '%samsum%';
+
+-- Lấy sản phẩm thứ 2 đến thứ 3 theo giá giảm dần (tức là bỏ qua sp đắt nhất)
+
+select  id, name
+from test.products p
+order by p.price desc
+limit 2 offset 1 ;
