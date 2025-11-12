@@ -1,0 +1,66 @@
+CREATE TABLE books (
+  id            SERIAL PRIMARY KEY,
+  title         VARCHAR(200) NOT NULL,
+  author        VARCHAR(120) NOT NULL,
+  category      VARCHAR(50)  NOT NULL,
+  publish_year  INT          NOT NULL,
+  price         NUMERIC(12,0) NOT NULL,   
+  stock         INT
+);
+
+INSERT INTO books (title, author, category, publish_year, price, stock) VALUES
+('Lập trình C cơ bản',              'Nguyễn Văn Nam',  'CNTT', 2018,  95000,  20),
+('Học SQL qua ví dụ',               'Trần Thị Hạnh',   'CSDL', 2020, 125000,  12),
+('Lập trình C cơ bản',              'Nguyễn Văn Nam',  'CNTT', 2018,  95000,  20),  -- trùng hoàn toàn
+('Phân tích dữ liệu với Python',    'Lê Quốc Bảo',     'CNTT', 2022, 180000,  NULL),
+('Quản trị cơ sở dữ liệu',          'Nguyễn Thị Minh', 'CSDL', 2021, 150000,  5),
+('Học máy cho người mới bắt đầu',   'Nguyễn Văn Nam',  'AI',   2023, 220000,  8),
+('Khoa học dữ liệu cơ bản',         'Nguyễn Văn Nam',  'AI',   2023, 220000,  NULL);
+
+
+DELETE FROM books b
+USING (
+  SELECT ctid,
+         ROW_NUMBER() OVER (
+           PARTITION BY title, author, publish_year
+           ORDER BY id
+         ) AS rn
+  FROM books
+) d
+WHERE b.ctid = d.ctid
+  AND d.rn > 1;
+
+
+UPDATE books
+SET price = ROUND(price * 1.10)
+WHERE publish_year >= 2021
+  AND price < 200000;
+
+
+UPDATE books
+SET stock = 0
+WHERE stock IS NULL;
+
+
+SELECT id, title, author, category, publish_year, price, stock
+FROM books
+WHERE category IN ('CNTT','AI')
+  AND price BETWEEN 100000 AND 250000
+ORDER BY price DESC, title ASC;
+
+
+SELECT id, title, author, category, publish_year, price, stock
+FROM books
+WHERE title ILIKE '%học%';
+
+
+SELECT DISTINCT category
+FROM books
+WHERE publish_year > 2020
+ORDER BY category;
+
+
+SELECT id, title, author, category, publish_year, price, stock
+FROM books
+ORDER BY price DESC, title ASC
+LIMIT 2 OFFSET 1;
